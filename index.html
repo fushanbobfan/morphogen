@@ -45,6 +45,13 @@
       </div>
 
       <div class="control-row">
+        <span class="map-label">Feed/kill map</span>
+        <canvas id="map" class="map" width="248" height="186" tabindex="0" role="img"
+          aria-label="Map of the feed and kill rate plane. Click or use the arrow keys to move the marker; dots mark the named regimes."></canvas>
+        <p id="map-hint" class="hint">Click anywhere to try that pair of rates. Dots are the named regimes.</p>
+      </div>
+
+      <div class="control-row">
         <label for="steps">Speed <output id="steps-value" for="steps">8</output></label>
         <input id="steps" type="range" min="1" max="30" step="1" value="8" />
       </div>
@@ -75,7 +82,7 @@
 
       <p class="hint">
         Shortcuts: <kbd>Space</kbd> pause, <kbd>.</kbd> step, <kbd>R</kbd> reseed, <kbd>C</kbd> clear,
-        <kbd>P</kbd> next palette, <kbd>1</kbd>/<kbd>2</kbd> pick a tool.
+        <kbd>P</kbd> next palette, <kbd>1</kbd>/<kbd>2</kbd> pick a tool, arrow keys on the map nudge the rates.
       </p>
     </section>
   </main>

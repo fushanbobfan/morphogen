@@ -154,6 +154,19 @@ canvas {
   margin-right: auto;
 }
 
+.map-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+canvas.map {
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  background: #0f171a;
+  cursor: crosshair;
+  image-rendering: auto;
+}
+
 .control-row output {
   color: var(--text);
   font-variant-numeric: tabular-nums;
