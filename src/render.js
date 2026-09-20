@@ -146,3 +146,57 @@ export function defaultWindow(channel) {
       return { lo: 0, hi: 0.5 };
   }
 }
+
+// Relief shading: treat the chosen channel as a height field, light it from
+// one side, and scale each cell's palette colour by how squarely its slope
+// faces the light. A flat area keeps exactly its palette colour, so turning
+// shading on only changes the edges of spots and stripes.
+export const DEFAULT_LIGHT = Object.freeze({ azimuth: 315, elevation: 45 });
+
+// Unit light vector from compass-style angles: azimuth in degrees clockwise
+// from the top of the canvas, elevation in degrees above the surface.
+export function lightVector(azimuth = DEFAULT_LIGHT.azimuth, elevation = DEFAULT_LIGHT.elevation) {
+  const az = (azimuth * Math.PI) / 180;
+  const el = (elevation * Math.PI) / 180;
+  const horizontal = Math.cos(el);
+  return { x: Math.sin(az) * horizontal, y: -Math.cos(az) * horizontal, z: Math.sin(el) };
+}
+
+// Per-cell brightness factors for the field seen as a height map. `relief`
+// scales the slopes (how tall the pattern looks) and `strength` how much the
+// lighting can brighten or darken a cell.
+export function reliefFactors(grid, out, { channel = 'b', relief = 12, strength = 1, light = lightVector() } = {}) {
+  const { width, height } = grid;
+  const n = width * height;
+  if (out.length < n) throw new RangeError('output buffer too small');
+  const lz = light.z;
+  for (let y = 0; y < height; y++) {
+    const up = ((y + height - 1) % height) * width;
+    const down = ((y + 1) % height) * width;
+    const row = y * width;
+    for (let x = 0; x < width; x++) {
+      const xl = (x + width - 1) % width;
+      const xr = (x + 1) % width;
+      // Central differences on a periodic grid.
+      const gx = (channelValue(grid, row + xr, channel) - channelValue(grid, row + xl, channel)) * 0.5 * relief;
+      const gy = (channelValue(grid, down + x, channel) - channelValue(grid, up + x, channel)) * 0.5 * relief;
+      const inv = 1 / Math.sqrt(gx * gx + gy * gy + 1);
+      // Surface normal is (-gx, -gy, 1) normalised; flat ground gives (0, 0, 1).
+      const lambert = (-gx * light.x - gy * light.y + lz) * inv;
+      out[row + x] = Math.max(0, 1 + strength * (lambert - lz));
+    }
+  }
+  return out;
+}
+
+// Multiply already-painted RGBA pixels by per-cell brightness factors.
+export function applyShading(pixels, factors, count) {
+  for (let i = 0; i < count; i++) {
+    const f = factors[i];
+    const o = i * 4;
+    pixels[o] = pixels[o] * f;
+    pixels[o + 1] = pixels[o + 1] * f;
+    pixels[o + 2] = pixels[o + 2] * f;
+  }
+  return pixels;
+}
