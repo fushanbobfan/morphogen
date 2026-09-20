@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Morphogen</title>
+  <meta name="description" content="An interactive reaction-diffusion pattern lab: paint seeds, tune feed and kill rates, and watch spots, stripes, corals and worms grow." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Morphogen</h1>
+    <p class="subtitle">A reaction-diffusion pattern lab. Paint a few seeds, pick a regime, and watch chemistry draw.</p>
+  </header>
+
+  <main>
+    <section class="stage" aria-label="Pattern canvas">
+      <canvas id="dish" width="320" height="240" aria-label="Reaction-diffusion field">
+        Your browser does not support the canvas element.
+      </canvas>
+      <div class="stage-bar">
+        <div class="tool-group" role="radiogroup" aria-label="Pointer tool">
+          <label><input type="radio" name="tool" value="seed" checked /> Paint B</label>
+          <label><input type="radio" name="tool" value="erase" /> Erase</label>
+        </div>
+        <p id="status" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Simulation controls">
+      <div class="control-row">
+        <label for="preset">Regime</label>
+        <select id="preset"></select>
+        <p id="preset-description" class="hint"></p>
+      </div>
+
+      <div class="control-row">
+        <label for="feed">Feed rate <em>f</em> <output id="feed-value" for="feed">0.0370</output></label>
+        <input id="feed" type="range" min="0.005" max="0.11" step="0.0005" value="0.037" />
+      </div>
+
+      <div class="control-row">
+        <label for="kill">Kill rate <em>k</em> <output id="kill-value" for="kill">0.0600</output></label>
+        <input id="kill" type="range" min="0.04" max="0.075" step="0.0005" value="0.06" />
+      </div>
+
+      <div class="control-row">
+        <label for="steps">Speed <output id="steps-value" for="steps">8</output></label>
+        <input id="steps" type="range" min="1" max="30" step="1" value="8" />
+      </div>
+
+      <div class="control-row">
+        <label for="brush">Brush size <output id="brush-value" for="brush">6</output></label>
+        <input id="brush" type="range" min="1" max="24" step="1" value="6" />
+      </div>
+
+      <div class="control-row">
+        <label for="palette">Palette</label>
+        <select id="palette"></select>
+      </div>
+
+      <div class="control-row">
+        <label for="channel">Show</label>
+        <select id="channel"></select>
+      </div>
+
+      <div class="control-row button-row">
+        <button id="pause" type="button" aria-pressed="false">Pause</button>
+        <button id="step" type="button">Step</button>
+      </div>
+      <div class="control-row button-row">
+        <button id="reseed" type="button">Reseed</button>
+        <button id="clear" type="button">Clear</button>
+      </div>
+
+      <p class="hint">
+        Shortcuts: <kbd>Space</kbd> pause, <kbd>.</kbd> step, <kbd>R</kbd> reseed, <kbd>C</kbd> clear,
+        <kbd>P</kbd> next palette, <kbd>1</kbd>/<kbd>2</kbd> pick a tool.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Two chemicals share every cell: A is fed in everywhere, B converts A into more of itself and is slowly
+      removed. Because A spreads faster than B, small blobs of B grow at their edges and starve in the middle,
+      and the feed and kill rates decide whether that makes spots, stripes, mazes or cells that divide.
+    </p>
+  </footer>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
