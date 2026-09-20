@@ -38,6 +38,7 @@ const ui = {
   step: document.getElementById('step'),
   reseed: document.getElementById('reseed'),
   clear: document.getElementById('clear'),
+  save: document.getElementById('save'),
   status: document.getElementById('status'),
   tools: Array.from(document.querySelectorAll('input[name="tool"]')),
 };
@@ -156,6 +157,31 @@ ui.step.addEventListener('click', () => {
   draw();
 });
 ui.reseed.addEventListener('click', reseed);
+ui.save.addEventListener('click', saveImage);
+
+// Download the current field as a PNG, upscaled 3x with smoothing so the
+// file looks like the on-screen canvas rather than a tiny 320x240 bitmap.
+function saveImage() {
+  const scale = 3;
+  const out = document.createElement('canvas');
+  out.width = WIDTH * scale;
+  out.height = HEIGHT * scale;
+  const octx = out.getContext('2d');
+  octx.imageSmoothingEnabled = true;
+  octx.imageSmoothingQuality = 'high';
+  octx.drawImage(canvas, 0, 0, out.width, out.height);
+  const f = formatRate(grid.params.feed);
+  const k = formatRate(grid.params.kill);
+  out.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `morphogen-f${f}-k${k}-step${grid.steps}.png`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, 'image/png');
+}
 ui.clear.addEventListener('click', () => {
   grid.clear();
   draw();
@@ -328,6 +354,10 @@ window.addEventListener('keydown', (event) => {
       setPalette(PALETTES[(i + 1) % PALETTES.length].id);
       break;
     }
+    case 's':
+    case 'S':
+      saveImage();
+      break;
     case '1':
       selectTool('seed');
       break;
