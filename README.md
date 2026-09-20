@@ -39,6 +39,9 @@ static server works too.
 | Brush size | Radius of the paint and erase brushes, in cells |
 | Palette | Colour ramp |
 | Show | Which quantity is drawn: B, A, or A − B |
+| Relief shading | Light the field as a height map so spots and ridges look embossed |
+| Light direction | Compass bearing the light comes from, 0° at the top and clockwise |
+| Relief height | How tall the pattern is treated as: higher exaggerates the edges |
 | Pause / Step | Freeze the field, or advance it a single step |
 | Reseed | Wipe the field and lay down the current regime's seeds again |
 | Clear | Wipe the field to the empty state (then paint your own seeds) |
@@ -49,7 +52,7 @@ the new rules: drag from **Coral** toward **Mitosis** and watch the ridges
 break into cells.
 
 Keyboard: <kbd>Space</kbd> pause, <kbd>.</kbd> step, <kbd>R</kbd> reseed,
-<kbd>C</kbd> clear, <kbd>P</kbd> next palette, <kbd>S</kbd> save image,
+<kbd>C</kbd> clear, <kbd>P</kbd> next palette, <kbd>H</kbd> relief shading, <kbd>S</kbd> save image,
 <kbd>1</kbd>/<kbd>2</kbd> pick a tool, arrow keys on the map nudge the rates.
 
 ### Regimes
@@ -102,6 +105,14 @@ explore.
 Colours come from a palette of colour stops sampled into a 256-entry lookup
 table; each channel has its own contrast window (B rarely climbs above 0.5,
 so it is stretched to fill the palette).
+
+Relief shading treats the drawn channel as a height map: each cell's slope
+comes from central differences on the periodic grid, the surface normal is
+lit with a single directional light (Lambert's cosine law), and the palette
+colour is scaled by how the slope's brightness compares with flat ground.
+Flat areas keep exactly their palette colour, so shading only changes the
+edges of spots and stripes: the side facing the light brightens and the far
+side falls into shadow.
 
 ## Project layout
 
