@@ -92,8 +92,9 @@ export function buildLut(stops, size = 256) {
   return lut;
 }
 
-// Which number each cell shows. `difference` (A minus B) is the classic
-// reaction-diffusion look: B-rich cells read as dark ridges on a light ground.
+// Which number each cell shows. With a dark-to-light palette, `difference`
+// (A minus B) gives the classic reaction-diffusion look: B-rich cells read as
+// dark ridges on a light ground.
 export const CHANNELS = [
   { id: 'b', name: 'B (activator)' },
   { id: 'a', name: 'A (substrate)' },
