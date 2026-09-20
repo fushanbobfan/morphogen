@@ -71,6 +71,21 @@
         <select id="channel"></select>
       </div>
 
+      <div class="control-row checkbox-row">
+        <input id="relief" type="checkbox" />
+        <label for="relief">Relief shading</label>
+      </div>
+
+      <div class="control-row">
+        <label for="light">Light direction <output id="light-value" for="light">315°</output></label>
+        <input id="light" type="range" min="0" max="360" step="5" value="315" />
+      </div>
+
+      <div class="control-row">
+        <label for="relief-height">Relief height <output id="relief-height-value" for="relief-height">12</output></label>
+        <input id="relief-height" type="range" min="2" max="40" step="1" value="12" />
+      </div>
+
       <div class="control-row button-row">
         <button id="pause" type="button" aria-pressed="false">Pause</button>
         <button id="step" type="button">Step</button>
@@ -85,7 +100,7 @@
 
       <p class="hint">
         Shortcuts: <kbd>Space</kbd> pause, <kbd>.</kbd> step, <kbd>R</kbd> reseed, <kbd>C</kbd> clear,
-        <kbd>P</kbd> next palette, <kbd>S</kbd> save image, <kbd>1</kbd>/<kbd>2</kbd> pick a tool, arrow keys on the map nudge the rates.
+        <kbd>P</kbd> next palette, <kbd>H</kbd> relief shading, <kbd>S</kbd> save image, <kbd>1</kbd>/<kbd>2</kbd> pick a tool, arrow keys on the map nudge the rates.
       </p>
     </section>
   </main>

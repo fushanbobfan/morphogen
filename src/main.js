@@ -8,6 +8,9 @@ import {
   CHANNELS,
   paintField,
   defaultWindow,
+  lightVector,
+  reliefFactors,
+  applyShading,
 } from './render.js';
 import { rateToPixel, pixelToRate, nearestPreset, snapRate } from './parammap.js';
 
@@ -39,6 +42,11 @@ const ui = {
   reseed: document.getElementById('reseed'),
   clear: document.getElementById('clear'),
   save: document.getElementById('save'),
+  relief: document.getElementById('relief'),
+  light: document.getElementById('light'),
+  lightValue: document.getElementById('light-value'),
+  reliefHeight: document.getElementById('relief-height'),
+  reliefHeightValue: document.getElementById('relief-height-value'),
   status: document.getElementById('status'),
   tools: Array.from(document.querySelectorAll('input[name="tool"]')),
 };
@@ -53,7 +61,11 @@ const state = {
   paused: false,
   tool: 'seed',
   pointerDown: false,
+  relief: false,
+  light: lightVector(Number(ui.light.value)),
+  reliefHeight: Number(ui.reliefHeight.value),
 };
+const shadeBuffer = new Float32Array(WIDTH * HEIGHT);
 
 // --- controls ---------------------------------------------------------------
 
@@ -148,6 +160,23 @@ ui.steps.addEventListener('input', () => {
 ui.brush.addEventListener('input', () => {
   state.brush = Number(ui.brush.value);
   ui.brushValue.textContent = ui.brush.value;
+});
+
+function setRelief(on) {
+  state.relief = on;
+  ui.relief.checked = on;
+  draw();
+}
+ui.relief.addEventListener('change', () => setRelief(ui.relief.checked));
+ui.light.addEventListener('input', () => {
+  state.light = lightVector(Number(ui.light.value));
+  ui.lightValue.textContent = `${ui.light.value}°`;
+  if (state.paused) draw();
+});
+ui.reliefHeight.addEventListener('input', () => {
+  state.reliefHeight = Number(ui.reliefHeight.value);
+  ui.reliefHeightValue.textContent = ui.reliefHeight.value;
+  if (state.paused) draw();
 });
 
 ui.pause.addEventListener('click', () => setPaused(!state.paused));
@@ -358,6 +387,10 @@ window.addEventListener('keydown', (event) => {
     case 'S':
       saveImage();
       break;
+    case 'h':
+    case 'H':
+      setRelief(!state.relief);
+      break;
     case '1':
       selectTool('seed');
       break;
@@ -373,6 +406,10 @@ window.addEventListener('keydown', (event) => {
 
 function draw() {
   paintField(grid, image.data, state.lut, { channel: state.channel, ...defaultWindow(state.channel) });
+  if (state.relief) {
+    reliefFactors(grid, shadeBuffer, { channel: state.channel, relief: state.reliefHeight, light: state.light });
+    applyShading(image.data, shadeBuffer, WIDTH * HEIGHT);
+  }
   ctx.putImageData(image, 0, 0);
 }
 

@@ -10,6 +10,10 @@ import {
   channelValue,
   paintField,
   defaultWindow,
+  DEFAULT_LIGHT,
+  lightVector,
+  reliefFactors,
+  applyShading,
 } from '../src/render.js';
 
 test('palettes have unique ids and stops that climb from 0 to 1', () => {
@@ -95,4 +99,54 @@ test('defaultWindow gives a sensible span per channel', () => {
     assert.ok(w.hi > w.lo);
   }
   assert.deepEqual(defaultWindow('b'), { lo: 0, hi: 0.5 });
+});
+
+test('lightVector points down-and-across for the default light and straight down at 90 degrees', () => {
+  const l = lightVector();
+  assert.ok(Math.abs(Math.hypot(l.x, l.y, l.z) - 1) < 1e-9, 'unit length');
+  assert.ok(l.x < 0 && l.y < 0 && l.z > 0, 'north-west, above the surface');
+  const overhead = lightVector(0, 90);
+  assert.ok(Math.abs(overhead.z - 1) < 1e-9);
+  assert.ok(Math.abs(overhead.x) < 1e-9 && Math.abs(overhead.y) < 1e-9);
+  assert.equal(DEFAULT_LIGHT.azimuth, 315);
+});
+
+test('a flat field shades to exactly 1 everywhere', () => {
+  const g = new GrayScott(6, 5);
+  g.b.fill(0.3);
+  const out = reliefFactors(g, new Float32Array(30));
+  for (const f of out) assert.ok(Math.abs(f - 1) < 1e-6);
+});
+
+test('slopes facing the light brighten and slopes facing away darken', () => {
+  // A ridge in B along column 4. Its east flank faces east, its west flank faces west.
+  const g = new GrayScott(9, 3);
+  for (let y = 0; y < 3; y++) g.b[g.index(4, y)] = 1;
+  const light = lightVector(90, 45); // from the right (east)
+  const out = reliefFactors(g, new Float32Array(27), { light });
+  const west = out[g.index(3, 1)];
+  const east = out[g.index(5, 1)];
+  assert.ok(east > 1, `east flank should brighten, got ${east}`);
+  assert.ok(west < 1, `west flank should darken, got ${west}`);
+  assert.ok(Math.abs(out[g.index(0, 1)] - 1) < 1e-6, 'flat cells unchanged');
+});
+
+test('relief and strength scale the effect, and the buffer is checked', () => {
+  const g = new GrayScott(9, 3);
+  for (let y = 0; y < 3; y++) g.b[g.index(4, y)] = 1;
+  // The east flank faces away from the default north-west light, so it only gets darker
+  // as the ridge gets steeper; factors never go below zero.
+  const mild = reliefFactors(g, new Float32Array(27), { relief: 2 })[g.index(5, 1)];
+  const steep = reliefFactors(g, new Float32Array(27), { relief: 20 })[g.index(5, 1)];
+  const weak = reliefFactors(g, new Float32Array(27), { relief: 20, strength: 0.25 })[g.index(5, 1)];
+  assert.ok(steep < mild && mild < 1);
+  assert.ok(steep >= 0);
+  assert.ok(weak > steep);
+  assert.throws(() => reliefFactors(g, new Float32Array(5)), RangeError);
+});
+
+test('applyShading scales RGB, clamps through the typed array and leaves alpha alone', () => {
+  const pixels = new Uint8ClampedArray([100, 200, 50, 255, 100, 100, 100, 255]);
+  applyShading(pixels, [1.5, 0.5], 2);
+  assert.deepEqual(Array.from(pixels), [150, 255, 75, 255, 50, 50, 50, 255]);
 });

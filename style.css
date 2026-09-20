@@ -141,6 +141,22 @@ canvas {
   gap: 0.25rem;
 }
 
+.checkbox-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-row input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+.checkbox-row label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .control-row label {
   display: flex;
   justify-content: space-between;
